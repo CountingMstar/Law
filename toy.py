@@ -80,3 +80,31 @@ for epoch in range(3):  # Adjust the number of epochs as needed
     print(f"Training Loss: {avg_train_loss}")
     print(f"Validation Accuracy: {val_accuracy}")
     print("---------------------------")
+
+
+
+# Estimate labels for a new text
+new_text = ['I love you so much', 'you are good', 'so sexy']
+
+# Tokenize the new text
+new_text_encodings = tokenizer(new_text, truncation=True, padding=True)
+
+# Create a dataset for the new text
+new_text_dataset = TextClassificationDataset(new_text_encodings, [0]* len(new_text))  # Provide a dummy label since it's not used in inference
+
+# Create a data loader for the new text
+new_text_loader = DataLoader(new_text_dataset, batch_size=1, shuffle=False)
+
+# Switch model to evaluation mode
+model.eval()
+
+for batch in new_text_loader:
+    inputs = {key: val.to(device) for key, val in batch.items()}
+    with torch.no_grad():
+        outputs = model(**inputs)
+    logits = outputs.logits
+    predicted_label = torch.argmax(logits, dim=1).item()
+
+    # Print the estimated label
+    estimated_label = "Positive" if predicted_label == 1 else "Negative"
+    print(f"Estimated Label for '{new_text[0]}': {estimated_label}")
